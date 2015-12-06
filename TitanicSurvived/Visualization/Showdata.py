@@ -16,15 +16,21 @@ def groud_Salutation(salutation):
     else:
         return True
 
-train = pd.read_csv("../Data/train.csv")
+titanic_df = pd.read_csv("../Data/train.csv")
 
-print train.info()
+print titanic_df.head()
+
+print("----------------------------")
+titanic_df.info()
+# print train
+
+titanic_df["Sex"].value_counts()
 
 print "********************************************"
 
-print train.columns.values
+print titanic_df.columns
 
-Embarked_stat = train["Embarked"].value_counts()
+Embarked_stat = titanic_df["Embarked"].value_counts()
 
 Sex_stats = train["Sex"].value_counts()
 

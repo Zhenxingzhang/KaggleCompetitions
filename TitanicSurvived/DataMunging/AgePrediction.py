@@ -70,51 +70,43 @@ def Age_Prediction(train_df, Age_Test):
 
     return age_results
 
-titanic_df['Salutation'] = Salutation_Assign(titanic_df)
+if __name__ == "__main__":
+    titanic_df['Salutation'] = Salutation_Assign(titanic_df)
 
-titanic_df = Convert_Non_Numeric(titanic_df)
+    titanic_df = Convert_Non_Numeric(titanic_df)
 
-Salutation_stats = titanic_df['Salutation'].value_counts()
+    Salutation_stats = titanic_df['Salutation'].value_counts()
 
-titanic_df.boxplot(column='Age', by='Salutation')
-plt.xlabel("Salutation")
-plt.ylabel("Age")
-plt.show()
+    titanic_df.boxplot(column='Age', by='Salutation')
+    plt.xlabel("Salutation")
+    plt.ylabel("Age")
+    plt.show()
 
-# titanic_df["Age"] = titanic_df["Age"].fillna(titanic_df["Age"].median())
+    # titanic_df["Age"] = titanic_df["Age"].fillna(titanic_df["Age"].median())
 
-train_age = titanic_df[titanic_df['Age'].notnull()]
+    train_age = titanic_df[titanic_df['Age'].notnull()]
 
-Age_Result = train_age['Age']
+    Age_Result = train_age['Age']
 
-predictions = Age_Prediction(train_age, train_age)
+    predictions = Age_Prediction(train_age, train_age)
 
-# plt.subplot(2, 1, 1)
-# plt.hist(Age_Result, bins=10, range = (Age_Result.min(),Age_Result.max()))
-#
-# plt.subplot(2, 1, 2)
-# plt.hist(predictions, bins=10, range = (Age_Result.min(),Age_Result.max()))
-# plt.show()
+    # plt.subplot(2, 1, 1)
+    # plt.hist(Age_Result, bins=10, range = (Age_Result.min(),Age_Result.max()))
+    #
+    # plt.subplot(2, 1, 2)
+    # plt.hist(predictions, bins=10, range = (Age_Result.min(),Age_Result.max()))
+    # plt.show()
 
-Age_Test = titanic_df[titanic_df['Age'].isnull()]
-predictions = Age_Prediction(train_age, Age_Test)
+    Age_Test = titanic_df[titanic_df['Age'].isnull()]
+    predictions = Age_Prediction(train_age, Age_Test)
 
-titanic_df['Age'] = titanic_df['Age'].fillna(pd.Series(predictions, index=Age_Test.index.values))
+    titanic_df['Age'] = titanic_df['Age'].fillna(pd.Series(predictions, index=Age_Test.index.values))
 
-# print titanic_df['Age'].describe()
-# plt.subplot(2, 1, 1)
-# plt.hist(train_age['Age'], bins=10, range = (titanic_df['Age'].min(),titanic_df['Age'].max()))
-#
-# plt.subplot(2, 1, 2)
-# plt.hist(titanic_df['Age'], bins=10, range = (titanic_df['Age'].min(),titanic_df['Age'].max()))
-# plt.show()
+    # print titanic_df['Age'].describe()
+    # plt.subplot(2, 1, 1)
+    # plt.hist(train_age['Age'], bins=10, range = (titanic_df['Age'].min(),titanic_df['Age'].max()))
+    #
+    # plt.subplot(2, 1, 2)
+    # plt.hist(titanic_df['Age'], bins=10, range = (titanic_df['Age'].min(),titanic_df['Age'].max()))
+    # plt.show()
 
-predictors = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
-
-# Initialize our algorithm
-# alg = LogisticRegression(random_state=1)
-alg = RandomForestClassifier(random_state=1, n_estimators=150, min_samples_split=4, min_samples_leaf=2)
-# Compute the accuracy score for all the cross validation folds.  (much simpler than what we did before!)
-scores = cross_validation.cross_val_score(alg, titanic_df[predictors], titanic_df["Survived"], cv=3)
-# Take the mean of the scores (because we have one for each fold)
-print(scores.mean())

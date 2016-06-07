@@ -85,7 +85,7 @@ def pre_process_(train,test):
     #remove redundant column Sex=male
     train=train.drop(['Sex=male'],1)
     test=test.drop(['Sex=male'],1)
-    #merge rare title classes into 2
+    #merge rare title classes into 2ju
     train['lady']=train['title=Jonkheer']+train['title=Lady']+train['title=the Countess']
     train['boss']=train['title=Col']+train['title=Don']+train['title=Major']
     test['lady']=test['title=Dona']+test['title=Ms']

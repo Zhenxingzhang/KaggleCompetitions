@@ -7,6 +7,9 @@ ompiled source #
 *.o
 *.so
 *pyc
+*.csv
+*.dot
+*.png
 
 # Packages #
 ############
@@ -37,3 +40,4 @@ ompiled source #
 ehthumbs.db
 Thumbs.db
 .idea
+*.ipynb

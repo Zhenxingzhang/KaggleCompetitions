@@ -25,6 +25,17 @@ def submit(filename):
     train,test=read_data()
     #does some of the trevor stephens pre-processing, check docstring of function
     train,test,y_matrix,id_matrix=pre_process_(train,test)
+
+    train.info()
+
+    print(train["title=Dr"].value_counts())
+    print(train["title=Master"].value_counts())
+    print(train["title=Miss"].value_counts())
+    print(train["title=Mr"].value_counts())
+    print(train["title=Mrs"].value_counts())
+    print(train["title=Rev"].value_counts())
+    print(train["boss"].value_counts())
+    print(train["lady"].value_counts())
     #turns dataframes into matrices so the logistic regression code doesnt flip out
     train_,test_=turn_into_matrices(train,test)
     #get theta

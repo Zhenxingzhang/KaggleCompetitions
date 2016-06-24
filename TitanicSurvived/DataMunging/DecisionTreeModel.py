@@ -1,7 +1,18 @@
 # python 3.5.0
 #import dependencies
 import pandas as pd
-from sklearn import tree
+from sklearn import tree,cross_validation
+from sklearn.grid_search import GridSearchCV
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def one_hot_dataframe(data, column_name):
+    dummies_data = pd.get_dummies(data[column_name])
+    dummies_data.index = data.index
+    dummies_data.columns = ["{}_{}".format(column_name, idx) for idx in dummies_data.columns]
+
+    return dummies_data
 
 train_data = pd.read_csv("../Data/train.csv")
 test_data = pd.read_csv("../Data/test.csv")
@@ -25,29 +36,63 @@ combi_df.ix[combi_df.Title.isin(["Mlle", "Mme"]), "Title"] = "Mlle"
 combi_df.ix[combi_df.Title.isin(["Dona", "Jonkheer", "Lady", "the Countess", "Ms"]), "Title"] = "Lady"
 combi_df.ix[~combi_df.Title.isin(["Mr", "Miss", "Mrs", "Master", "Sir", "Lady", "Mlle"]), "Title"] = "None"
 train_data["Title"] = combi_df["Title"][0:train_data.shape[0]]
-test_data["Title"] = combi_df["Title"][train_data.shape[0]:].reset_index(drop=True)
-
 
 # Data mungging, convert all string to integer, since sklearn only accept integer value.
-test_data["Fare"].fillna(train_data["Fare"].mean(), inplace=True)
 train_data["Embarked"].fillna("Q", inplace= True )
 
-train_data["Embarked_Int"] = train_data["Embarked"].map({"S": 1, "C":2, "Q":3})
-test_data["Embarked_Int"] = test_data["Embarked"].map({"S": 1, "C":2, "Q":3})
 
-
-train_data["Title_Int"] = train_data["Title"].map({"Mr": 1, "Miss":2, "Mrs":3, "None" :4, "Master":5, "Sir":6, "Mlle":7, "Lady":8})
-test_data["Title_Int"] = test_data["Title"].map({"Mr": 1, "Miss":2, "Mrs":3, "None" :4, "Master":5, "Sir":6, "Mlle":7, "Lady":8})
+train_data = pd.concat([train_data, one_hot_dataframe(train_data, "Embarked")], axis=1)
+train_data = pd.concat([train_data, one_hot_dataframe(train_data, "Pclass")], axis=1)
+train_data = pd.concat([train_data, one_hot_dataframe(train_data, "Title")], axis=1)
 
 
 # Training the model
 # we want to build an simple decision tree on the Gender feature
 # to prove that gender will be picked for the first node
 class_names = ["Dead", "Survived"]
-feature_columns = ["Gender", "Pclass", "Fare", "Age", "Embarked_Int", "Title_Int"]
+feature_columns = ["Gender", "Pclass", "Fare", "Age"]
+# feature_columns = ["Gender","Title_Mr","Title_Mrs","Title_None","Title_Sir",
+# "Title_Miss","Title_Master", "Title_Lady", "Pclass_1", "Pclass_2", "Pclass_3",
+# "Fare", "Age", "FamilyNo", "Embarked_S", "Embarked_C","Embarked_Q"]
 train_labels = train_data.Survived
 
-clf = tree.DecisionTreeClassifier(max_depth=6, min_samples_leaf=10, criterion="entropy")
+# depths = np.arange(3, 20)
+#
+# train_scores = list()
+# cv_scores = list()
+# for depth in depths:
+#     clf = tree.DecisionTreeClassifier(max_depth=depth, min_samples_leaf=1, criterion="gini")
+#     cv_score = cross_validation.cross_val_score(clf, train_data[feature_columns], train_labels)
+#     cv_scores.append(cv_score.mean())
+#
+#     clf.fit(train_data[feature_columns], train_labels)
+#     train_scores.append(clf.score(train_data[feature_columns], train_labels))
+#
+# plt.plot(depths, train_scores, "r-")
+# plt.plot(depths, cv_scores, "b--")
+#
+# plt.show()
+
+
+# Set the parameters by cross-validation
+tuned_parameters = [{'criterion': ["gini", "entropy"],
+                     'max_depth': np.arange(2, 6, 1),
+                     'min_samples_leaf': [5, 6, 8, 10, 15, 20]}]
+
+
+clf = GridSearchCV(tree.DecisionTreeClassifier(), tuned_parameters, cv=10)
+
+clf.fit(train_data[feature_columns], train_labels)
+
+print(clf.best_estimator_)
+print(clf.best_score_)
+
+# for params, mean_score, scores in clf.grid_scores_:
+#     print("%0.3f (+/-%0.03f) for %r"
+#           % (mean_score, scores.std() * 2, params))
+# print()
+
+clf = tree.DecisionTreeClassifier(max_depth=3, min_samples_leaf=5, criterion="entropy")
 clf.fit(train_data[feature_columns], train_labels)
 
 

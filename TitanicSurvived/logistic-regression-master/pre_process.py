@@ -17,7 +17,7 @@ def read_data():
     train.csv and test.csv
     
     """
-    return pd.read_csv('./data/train.csv'),pd.read_csv('./data/test.csv')
+    return pd.read_csv('../data/train.csv'),pd.read_csv('../data/test.csv')
     
 def one_hot_dataframe(data, cols, replace=False):
     """

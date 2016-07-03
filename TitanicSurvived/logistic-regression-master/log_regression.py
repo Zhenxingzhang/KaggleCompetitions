@@ -171,6 +171,3 @@ def predict(X,theta):
     pred=hyp_log_r(X,theta)
     
     return pred
-
-
-        

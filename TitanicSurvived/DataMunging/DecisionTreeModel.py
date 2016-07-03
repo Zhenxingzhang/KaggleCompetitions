@@ -30,11 +30,9 @@ import re
 combi_df = train_data.append(test_data, ignore_index=True)
 # train_data["Name"].apply(lambda x : re.findall(r"[\w']+", x)[1]).value_counts()
 
-combi_df["Title"] = combi_df["Name"].apply(lambda x: re.findall(r"[\w']+", x)[1])
-combi_df.ix[combi_df.Title.isin(["Col", "Don", "Major", "Sir", "Capt"]), "Title"] = "Sir"
-combi_df.ix[combi_df.Title.isin(["Mlle", "Mme"]), "Title"] = "Mlle"
-combi_df.ix[combi_df.Title.isin(["Dona", "Jonkheer", "Lady", "the Countess", "Ms"]), "Title"] = "Lady"
-combi_df.ix[~combi_df.Title.isin(["Mr", "Miss", "Mrs", "Master", "Sir", "Lady", "Mlle"]), "Title"] = "None"
+combi_df["Title"] = combi_df["Name"].apply(lambda x: re.findall(r",[\w\s]+.", x)[0][2:-1].strip())
+combi_df.ix[combi_df.Title.isin(['Capt', 'Don', 'Major', 'Sir', 'Col']), "Title"] = "Sir"
+combi_df.ix[combi_df.Title.isin(['Dona', 'Lady', 'the Countess', 'Jonkheer', 'Ms', 'Mlle', 'Mme']), "Title"] = "Lady"
 train_data["Title"] = combi_df["Title"][0:train_data.shape[0]]
 
 # Data mungging, convert all string to integer, since sklearn only accept integer value.
@@ -50,10 +48,11 @@ train_data = pd.concat([train_data, one_hot_dataframe(train_data, "Title")], axi
 # we want to build an simple decision tree on the Gender feature
 # to prove that gender will be picked for the first node
 class_names = ["Dead", "Survived"]
-feature_columns = ["Gender", "Pclass", "Fare", "Age"]
-# feature_columns = ["Gender","Title_Mr","Title_Mrs","Title_None","Title_Sir",
-# "Title_Miss","Title_Master", "Title_Lady", "Pclass_1", "Pclass_2", "Pclass_3",
-# "Fare", "Age", "FamilyNo", "Embarked_S", "Embarked_C","Embarked_Q"]
+feature_columns = ["Gender", "Pclass", "Fare", "Age", "SibSp", "Parch", "Embarked_S", "Embarked_C","Embarked_Q"]
+feature_columns = ["Gender","Title_Mr","Title_Mrs","Title_Sir", "Title_Miss",
+                   "Title_Master", "Title_Lady", "Pclass_1", "Pclass_2", "Pclass_3",
+                   "Title_Sir", "Title_Dr", "Title_Rev",
+                   "Fare", "Age", "FamilyNo", "Embarked_S", "Embarked_C","Embarked_Q"]
 train_labels = train_data.Survived
 
 # depths = np.arange(3, 20)
@@ -76,8 +75,9 @@ train_labels = train_data.Survived
 
 # Set the parameters by cross-validation
 tuned_parameters = [{'criterion': ["gini", "entropy"],
-                     'max_depth': np.arange(2, 6, 1),
-                     'min_samples_leaf': [5, 6, 8, 10, 15, 20]}]
+                     "max_depth": [3, 4, 5, 6, 8],
+                     'min_samples_leaf': [5, 10, 15, 20],
+                     'min_samples_split':[5, 10, 15]}]
 
 
 clf = GridSearchCV(tree.DecisionTreeClassifier(), tuned_parameters, cv=10)
@@ -85,21 +85,29 @@ clf = GridSearchCV(tree.DecisionTreeClassifier(), tuned_parameters, cv=10)
 clf.fit(train_data[feature_columns], train_labels)
 
 print(clf.best_estimator_)
+print(clf.best_params_)
 print(clf.best_score_)
-
 # for params, mean_score, scores in clf.grid_scores_:
 #     print("%0.3f (+/-%0.03f) for %r"
 #           % (mean_score, scores.std() * 2, params))
 # print()
 
-clf = tree.DecisionTreeClassifier(max_depth=3, min_samples_leaf=5, criterion="entropy")
+# clf = tree.DecisionTreeClassifier(max_depth=3, min_samples_leaf=10, min_samples_split=15, criterion="entropy")
+clf = tree.DecisionTreeClassifier(max_depth=clf.best_params_['max_depth'],
+                                  min_samples_leaf=clf.best_params_['min_samples_leaf'],
+                                  min_samples_split=clf.best_params_['min_samples_split'],
+                                  criterion=clf.best_params_['criterion'])
 clf.fit(train_data[feature_columns], train_labels)
 
-
+"""
+1) Use pydotplus if you are using python 3+
+2) Change the last line to pydotplus.graph_from_dot_data(dotfile.getvalue()).write_png("dtree2.png") as your variable name is 'dotfile' and not 'dot_data'
+P.S - reinstall graphviz after you install pydotplus
+"""
 from sklearn.externals.six import StringIO
-import pydot
+import pydotplus
 dot_data = StringIO()
 tree.export_graphviz(clf, out_file=dot_data, feature_names=feature_columns, class_names=class_names,
                      filled=True)
-graph = pydot.graph_from_dot_data(dot_data.getvalue())
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
 graph.write_pdf("dt_one_depth.pdf")

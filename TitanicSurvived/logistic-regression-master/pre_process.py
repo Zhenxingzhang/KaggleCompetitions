@@ -7,7 +7,7 @@ Created on Thu Jun 19 14:17:52 2014
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
-from log_regression import *   
+from log_regression import *
 
 
 def read_data():

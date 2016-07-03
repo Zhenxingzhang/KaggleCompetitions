@@ -5,7 +5,7 @@ Created on Thu Jun 19 15:04:14 2014
 @author: sku
 """
 from pre_process import *
-from log_regression import *   
+from log_regression import *
 import numpy as np
 import pandas as pd
 
@@ -26,21 +26,24 @@ def submit(filename):
     #does some of the trevor stephens pre-processing, check docstring of function
     train,test,y_matrix,id_matrix=pre_process_(train,test)
 
-    train.info()
 
-    print(train["title=Dr"].value_counts())
-    print(train["title=Master"].value_counts())
-    print(train["title=Miss"].value_counts())
-    print(train["title=Mr"].value_counts())
-    print(train["title=Mrs"].value_counts())
-    print(train["title=Rev"].value_counts())
-    print(train["boss"].value_counts())
-    print(train["lady"].value_counts())
+    train.info()
+    test.info()
+
+    exit(0)
+    # print(train["title=Dr"].value_counts())
+    # print(train["title=Master"].value_counts())
+    # print(train["title=Miss"].value_counts())
+    # print(train["title=Mr"].value_counts())
+    # print(train["title=Mrs"].value_counts())
+    # print(train["title=Rev"].value_counts())
+    # print(train["boss"].value_counts())
+    # print(train["lady"].value_counts())
     #turns dataframes into matrices so the logistic regression code doesnt flip out
     train_,test_=turn_into_matrices(train,test)
     #get theta
     _,theta=logistic_regression(train_,y_matrix,alpha,n_iter,lambd)
-    print theta
+    print(theta)
     #get predictions in the test set
     pred=predict(test_,theta)
     #merge PassengerId and predictions to create the submission DataFrame

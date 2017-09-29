@@ -81,7 +81,7 @@ print('Find difference of number of images in test pairs ...')
 test['images_array_x'] =  test['images_array_x'].apply(lambda x:len(x.split()) if isinstance(x, str) else 0)
 test['images_array_y'] =  test['images_array_y'].apply(lambda x:len(x.split()) if isinstance(x, str) else 0)
 test['images_num_diff'] = test[['images_array_x', 'images_array_y']].apply(lambda x: abs(x[0]-x[1]), axis = 1)
-test = test.drop(['images_array_x', 'images_array_y'], axis = 1)
+test = test.drop(['images_array_x', 'images_array_y'], axis=1)
 train.to_csv('train.csv')
 test.to_csv('test.csv')
 
@@ -101,7 +101,7 @@ y = y[shflidx]
 
 clf = LogisticRegression()
 clf.fit(train, y)
-preds = clf.predict_proba(test)[:,1]
+preds = clf.predict_proba(test)[:, 1]
 sub = pd.DataFrame()
 sub['id'] = ids
 sub['probability'] = preds

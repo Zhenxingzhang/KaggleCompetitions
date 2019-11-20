@@ -1,0 +1,40 @@
+project:
+  name: cifar-10
+  syncFilters:
+    - exclude:
+      - .git/*
+      - .idea/*
+      - '*/__pycache__/*'
+      - '*.DS_Store'
+      - '*.ipynb_checkpoints'
+      - readme.md
+
+container:
+  projectDir: /workspace/project
+  image: tensorflow/tensorflow:latest-gpu-py3-jupyter
+  ports: [6006, 8888]
+  volumeMounts:
+    - name: workspace
+      mountPath: /workspace
+
+instances:
+  - name: i1
+    provider: aws
+    parameters:
+      region: eu-central-1 
+      availabilityZone: eu-central-1a 
+      onDemandInstance: true
+      subnetId: subnet-9eb9f0f7
+      instanceType: p2.xlarge
+      volumes:
+        - name: workspace
+          parameters:
+            size: 10
+      localSshPort: 2224
+
+
+scripts:
+  tensorboard: |
+    tensorboard --bind_all --logdir /workspace/tensorboard/
+  jupyter: |
+    jupyter notebook --allow-root --ip 0.0.0.0 --notebook-dir=/workspace

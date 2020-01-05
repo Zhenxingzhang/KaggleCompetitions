@@ -4,7 +4,7 @@ project:
     - exclude:
       - .git/*
       - .idea/*
-      - '*/__pycache__/*'
+      - '__pycache__/*'
       - '*.DS_Store'
       - '*.ipynb_checkpoints'
       - readme.md

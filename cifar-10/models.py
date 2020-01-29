@@ -9,7 +9,6 @@ INPUT_SHAPE = [32, 32, 3]
 # Model from here: https://www.kaggle.com/c/cifar-10/discussion/40237
 def Convnet():
     base_filter_num = 32
-    weight_decay = 1e-4
     model = Sequential()
     model.add(Conv2D(base_filter_num, (3, 3), padding='same', kernel_regularizer=regularizers.l2(weight_decay),
                      input_shape=INPUT_SHAPE))

@@ -5,6 +5,7 @@ from models import Convnet, standard_cnn
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau, Callback, TensorBoard
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorboard.plugins.hparams import api as hp
 
 
 if __name__=="__main__":
@@ -39,6 +40,10 @@ if __name__=="__main__":
     model.compile(optimizer=sgd,
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
+
+    HP_LEARN_RATE = hp.HParam('learning_rate', hp.RealInterval([16, 32]))
+    HP_DROPOUT = hp.HParam('dropout', hp.RealInterval(0.1, 0.2))
+    HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['adam', 'sgd']))
 
     if not data_augmentation:
         print('Not using data augmentation.')
